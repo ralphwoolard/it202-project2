@@ -1,0 +1,172 @@
+<!DOCTYPE html> 
+<html> 
+<body>
+<p id="p1">fun.</p> 
+<canvas id="myCanvas" width="500" height="500"></canvas>
+
+<style>
+  #myCanvas {background-color: black;}
+</style>
+    
+    
+<script>
+ 
+    var canvas = document.querySelector("#myCanvas");
+    var ctx= canvas.getContext("2d");
+    var lives = 5;
+    var level = 1;
+    var dX = dY = rand = choice = 0;
+    var posX = 50;
+    var score = 0;
+    var radius = 10;
+    var width = height = 500;
+    var harmX = 100
+    var healX = 250;
+
+    window.addEventListener("keydown", keysPressed, false);
+    window.addEventListener("keyup", keysReleased, false);
+
+    var keys = [];
+
+    
+    function scoreboard(lives, score, level){
+      ctx.font="20px Helvetica";
+      ctx.fillStyle = "yellow";
+      ctx.fillText("Lives:", 5, 20);
+      ctx.fillText(lives, 60,20);
+      ctx.fillText("Score:", 200, 20)
+      ctx.fillText(score,270,20);
+      ctx.fillText("Level:", 400, 20)
+      ctx.fillText(level,470,20);
+    }
+    
+    
+    function keysPressed(e) {
+        keys[e.keyCode] = true;
+
+        // left
+        if (keys[37]) {
+          dX -= 12;
+        }
+
+        // right
+        if (keys[39]) {
+          dX += 12;
+        }
+
+		
+		e.preventDefault();                    //prevents default movement...ie scrolling down on the page with down arrow
+    }
+
+    function keysReleased(e) {
+        // mark keys that were released
+        keys[e.keyCode] = false;
+    }
+
+    function drawHero(x) {
+      ctx.beginPath();
+      ctx.rect(250+x, 490, 60, 6);
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = "rgba(102, 102, 102, 1)";
+      ctx.stroke();
+      ctx.fillStyle = "grey";
+      ctx.fill();
+    }
+    
+    function drawHarm(x,y){    
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fillStyle = "red";
+      ctx.fill();
+            
+    }
+    function drawHeal(x,y){    
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fillStyle = "green";
+      ctx.fill();
+            
+    }
+
+    
+    function chooser(hX,y,choice){
+        
+        if(hX % 2 === 0){
+            drawHeal(hX,y);
+            choice = true;
+            return choice;
+         }
+        else{
+            drawHarm(hX,y);
+            choice = false
+            return choice;
+        }
+    }
+    
+
+
+    function collision(dX,dY,hX,choice,lives,score){
+        var rect1 = {x: dX, y: 490, width: 60, height: 1}
+        var rect2 = {x: hX, y: dY, width: 10, height: 10}
+
+    if (rect1.x < rect2.x + rect2.width &&
+       rect1.x + rect1.width > rect2.x &&
+       rect1.y < rect2.y + rect2.height &&
+       rect1.y + rect1.height > rect2.y) {
+
+                if(choice){
+                return lives--;
+                }
+                else{
+                return score++
+                }
+                
+    }
+}
+
+    
+    function endingMessage(){
+        
+        ctx.font = "50px Arial";
+        ctx.strokeText("Game Over",200,200);
+        ctx.fillStyle = "yellow";
+        ctx.fill();
+    }
+    
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      dY+=(1.5*level)+5;                //leveling up every 5 points increases speed
+       
+      if (dY > canvas.height + radius) {                //choose new vertical path each time around
+          dY = 0 - radius;
+          harmX = Math.floor((Math.random() * 490) + 10);
+      }
+        
+        
+      drawHero(dX);
+      chooser(harmX, dY,choice);                //chooses harm or heal object
+      collision(dX,dY,harmX,choice,lives,score,level);            //detects collision
+      level = score / 5;
+      scoreboard(lives, score, level);
+        
+      if(lives > 0){
+      requestAnimationFrame(animate);
+      }
+      else{
+      endingMessage();
+      }
+    
+    }
+    
+    animate();
+    
+    
+</script>
+
+
+
+
+</body>    
+</html>
